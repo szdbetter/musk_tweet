@@ -1085,19 +1085,16 @@ def render_cycle_forecast(
     st.markdown(summary_html, unsafe_allow_html=True)
 
     if remaining_dates:
-        last_date = remaining_dates[-1]
         desc_items = []
         for d in remaining_dates:
             wd = d.strftime("%a")
             wd_cn = WEEKDAY_CN.get(wd, wd)
-            label = f"{wd_cn}（{d:%m/%d}）"
-            if d == last_date:
-                label += " · 截至 12:00 PM"
-            desc_items.append(label)
+            desc_items.append(f"{wd_cn}（{d:%m/%d}）")
+        end_label = f"{WEEKDAY_CN.get(cycle_display_end.strftime('%a'), cycle_display_end.strftime('%a'))}（{cycle_display_end:%m/%d}） · 截至 12:00 PM"
         st.markdown(
             f"<div style='padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.12);margin-top:10px;'>"
             f"距离 {cycle_display_end:%m/%d} 12:00 PM 结束还有 <b>{remaining_count}</b> 天："
-            f"{'，'.join(desc_items)}。</div>",
+            f"{'，'.join(desc_items)}；终点 {end_label}。</div>",
             unsafe_allow_html=True,
         )
 
@@ -1195,11 +1192,11 @@ def render_cycle_forecast(
                             bucket_samples.append(actual_total + addition)
 
                 if bucket_samples:
-                    bucket_ranges = [(start, start + 20) for start in range(100, 500, 20)]
+                    bucket_ranges = [(start, start + 19) for start in range(100, 500, 20)]
                     total_samples = len(bucket_samples)
                     rows_html = []
                     for start, end in bucket_ranges:
-                        count = sum(1 for val in bucket_samples if start <= val < end)
+                        count = sum(1 for val in bucket_samples if start <= val <= end)
                         prob = count / total_samples
                         rows_html.append(
                             f"<tr><td>{start}–{end}</td><td>{prob*100:.1f}%</td></tr>"
